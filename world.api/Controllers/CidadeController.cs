@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using world.api.Models;
 using world.api.Database;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Routing;
+
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -24,9 +26,11 @@ namespace world.api.Controllers
         }
         // GET api/<ValuesController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ActionResult<Cidade>> GetById([FromServices] ApplicationDBContext context, int id)
         {
-            return "value";
+            var cidade = await context.Cidades.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.CidadeId == id);
+            return cidade;
         }
 
         // POST api/<ValuesController>

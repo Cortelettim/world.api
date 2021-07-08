@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using world.api.Models;
 using world.api.Database;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Routing;
+
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace world.api.Controllers
@@ -24,9 +26,11 @@ namespace world.api.Controllers
 
         // GET api/<ValuesController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ActionResult<Estado>> GetById([FromServices] ApplicationDBContext context, int id)
         {
-            return "value";
+            var estado = await context.Estados.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.EstadoId == id);
+            return estado;
         }
 
         // POST api/<ValuesController>
@@ -47,14 +51,24 @@ namespace world.api.Controllers
 
         // PUT api/<ValuesController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<ActionResult<Estado>> Put([FromServices] ApplicationDBContext context, int id)
         {
+            var estado = await context.Estados.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.EstadoId == id);
+
+              context.Estados.Update(estado);
+            return estado;
         }
 
         // DELETE api/<ValuesController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ActionResult<Estado>> Delete(int id, [FromServices] ApplicationDBContext context)
         {
+            var estado = await context.Estados.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.EstadoId == id);
+
+            context.Estados.Remove(estado);
+            return estado;
         }
     }
 }
