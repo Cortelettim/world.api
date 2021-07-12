@@ -52,14 +52,39 @@ namespace world.api.Controllers
 
         // PUT api/<ValuesController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<ActionResult<Pais>> Put([FromBody] Pais model, [FromServices] ApplicationDBContext context, int id)
         {
+            if (ModelState.IsValid)
+            {
+
+                var pais = await context.Paises.FirstOrDefaultAsync(x => x.PaisId == id);
+
+                if (pais != null)
+                {
+                    pais.NomePais = model.NomePais;
+                    pais.PaisId = model.PaisId;
+
+                    await context.SaveChangesAsync();
+                }
+
+                return Ok();
+            }
+            else
+            {
+                return BadRequest(ModelState); ;
+            }
         }
 
         // DELETE api/<ValuesController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ActionResult<Pais>> Delete(int id, [FromServices] ApplicationDBContext context)
         {
+            var pais = await context.Paises.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.PaisId == id);
+
+            context.Paises.Remove(pais);
+            await context.SaveChangesAsync();
+            return pais;
         }
     }
 }

@@ -51,13 +51,27 @@ namespace world.api.Controllers
 
         // PUT api/<ValuesController>/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<Estado>> Put([FromServices] ApplicationDBContext context, int id)
+        public async Task<ActionResult<Estado>> Put([FromServices] ApplicationDBContext context, int id, [FromBody] Estado model)
         {
-            var estado = await context.Estados.AsNoTracking()
-                .FirstOrDefaultAsync(x => x.EstadoId == id);
+            if (ModelState.IsValid)
+            {
 
-              context.Estados.Update(estado);
-            return estado;
+                var estado = await context.Estados.FirstOrDefaultAsync(x => x.EstadoId == id);
+
+                if (estado != null)
+                {
+                    estado.NomeEstado = model.NomeEstado;
+                    estado.PaisId = model.PaisId;
+                    estado.Pais = model.Pais;
+                    await context.SaveChangesAsync();
+                }
+               
+                return Ok();
+            }
+            else
+            {
+                 return BadRequest(ModelState); ;
+            }
         }
 
         // DELETE api/<ValuesController>/5
@@ -66,8 +80,8 @@ namespace world.api.Controllers
         {
             var estado = await context.Estados.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.EstadoId == id);
-
             context.Estados.Remove(estado);
+            await context.SaveChangesAsync();
             return estado;
         }
     }

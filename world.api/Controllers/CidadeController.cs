@@ -51,14 +51,40 @@ namespace world.api.Controllers
 
         // PUT api/<ValuesController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<ActionResult<Cidade>> Put([FromServices] ApplicationDBContext context, [FromBody] Cidade model, int id)
         {
-        }
 
+            if (ModelState.IsValid)
+            {
+
+                var cidade = await context.Cidades.FirstOrDefaultAsync(x => x.CidadeId == id);
+
+                if (cidade != null)
+                {
+                    cidade.NomeCidade = model.NomeCidade;
+                    cidade.EstadoId = model.EstadoId;
+                    cidade.Estado = model.Estado;
+                    await context.SaveChangesAsync();
+                }
+
+                return Ok();
+            }
+            else
+            {
+                return BadRequest(ModelState); ;
+            }
+        }
+        
         // DELETE api/<ValuesController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ActionResult<Cidade>> Delete(int id, [FromServices] ApplicationDBContext context)
         {
+            var cidade = await context.Cidades.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.CidadeId == id);
+
+            context.Cidades.Remove(cidade);
+            await context.SaveChangesAsync();
+            return cidade;
         }
     }
 }
